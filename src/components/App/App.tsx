@@ -6,22 +6,23 @@ import OfferScreen from '../pages/OfferScreen/OfferScreen';
 import NotFoundScreen from '../pages/NotFoundScreen/NotFoundScreen';
 import { AppRoute, AuthorizationStatus } from '../../const';
 import PrivateRoute from '../pages/PrivateRoute/PrivateRoute';
+import { Offer } from '../../mocks/offers';
 
 type AppProps = {
-  offersCount: number;
+  offers: Offer[];
 }
 
-function App({ offersCount }: AppProps): JSX.Element {
+function App({ offers }: AppProps): JSX.Element {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path={AppRoute.Main} element={<MainScreen offersCount={offersCount} />} />
+        <Route path={AppRoute.Main} element={<MainScreen offers={offers} />} />
         <Route path={AppRoute.Login} element={<LoginScreen />} />
         <Route
           path={AppRoute.Favorites}
           element={
-            <PrivateRoute authorizationStatus={AuthorizationStatus.NoAuth}>
-              <FavoritesScreen />
+            <PrivateRoute authorizationStatus={AuthorizationStatus.Auth}>
+              <FavoritesScreen offers={offers} />
             </PrivateRoute>
           }
         />
