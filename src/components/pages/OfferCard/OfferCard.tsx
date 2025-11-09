@@ -1,35 +1,45 @@
+import { Link } from 'react-router-dom';
+import { Offer } from '../../../mocks/offers';
+
 type OfferCardProps = {
-  isPremium?: boolean;
-  imageSrc: string;
-  price: number;
-  isBookmarked?: boolean;
-  ratingPercent: number; // 0..100
-  title: string;
-  type: string;
+  offer: Offer;
+  variant?: 'cities' | 'near-places' | 'favorites';
+  onMouseEnter?: (offerId: string) => void;
+  onMouseLeave?: () => void;
 };
 
-export function OfferCard(props: OfferCardProps): JSX.Element {
+export function OfferCard({ offer, variant = 'cities', onMouseEnter, onMouseLeave }: OfferCardProps): JSX.Element {
   const {
-    isPremium = false,
-    imageSrc,
+    isPremium,
+    previewImage: imageSrc,
     price,
-    isBookmarked = false,
-    ratingPercent,
+    isFavorite: isBookmarked,
+    rating,
     title,
     type,
-  } = props;
+  } = offer;
+
+  const ratingPercent = Math.round(rating * 20);
+
+  const articleClass = `${variant}__card place-card`;
+  const imageWrapperClass = `${variant}__image-wrapper place-card__image-wrapper`;
+  const imageSize = variant === 'favorites' ? { width: 150, height: 110 } : { width: 260, height: 200 } as const;
 
   return (
-    <article className="cities__card place-card">
+    <article
+      className={articleClass}
+      onMouseEnter={() => onMouseEnter?.(offer.id)}
+      onMouseLeave={() => onMouseLeave?.()}
+    >
       {isPremium && (
         <div className="place-card__mark">
           <span>Premium</span>
         </div>
       )}
-      <div className="cities__image-wrapper place-card__image-wrapper">
-        <a href="#">
-          <img className="place-card__image" src={imageSrc} width="260" height="200" alt="Place image" />
-        </a>
+      <div className={imageWrapperClass}>
+        <Link to={`/offer/${offer.id}`}>
+          <img className="place-card__image" src={imageSrc} width={imageSize.width} height={imageSize.height} alt="Place image" />
+        </Link>
       </div>
       <div className="place-card__info">
         <div className="place-card__price-wrapper">
@@ -51,7 +61,7 @@ export function OfferCard(props: OfferCardProps): JSX.Element {
           </div>
         </div>
         <h2 className="place-card__name">
-          <a href="#">{title}</a>
+          <Link to={`/offer/${offer.id}`}>{title}</Link>
         </h2>
         <p className="place-card__type">{type}</p>
       </div>
