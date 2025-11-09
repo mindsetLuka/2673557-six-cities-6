@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import OfferList from '../OfferList/OfferList';
 import { Offer } from '../../../mocks/offers';
+import Map from '../../Map/Map';
 
 type MainScreenProps = {
   offers: Offer[];
@@ -98,7 +99,9 @@ export function MainScreen({ offers }: MainScreenProps): JSX.Element {
               <OfferList offers={offers} variant="cities" />
             </section>
             <div className="cities__right-section">
-              <section className="cities__map map"></section>
+              <section className="cities__map map">
+                <Map offers={offers} selectedOffer={offers[0]} />
+              </section>
             </div>
           </div>
         </div>
