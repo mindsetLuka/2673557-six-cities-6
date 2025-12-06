@@ -1,14 +1,16 @@
+import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Offer } from '../../../mocks/offers';
 
 type OfferCardProps = {
   offer: Offer;
   variant?: 'cities' | 'near-places' | 'favorites';
-  onMouseEnter?: (offerId: string) => void;
-  onMouseLeave?: () => void;
+  onOfferHover?: (offerId: string | null) => void;
 };
 
-export function OfferCard({ offer, variant = 'cities', onMouseEnter, onMouseLeave }: OfferCardProps): JSX.Element {
+const OfferCardComponent = (
+  { offer, variant = 'cities', onOfferHover }: OfferCardProps
+): JSX.Element => {
   const {
     isPremium,
     previewImage: imageSrc,
@@ -25,11 +27,19 @@ export function OfferCard({ offer, variant = 'cities', onMouseEnter, onMouseLeav
   const imageWrapperClass = `${variant}__image-wrapper place-card__image-wrapper`;
   const imageSize = variant === 'favorites' ? { width: 150, height: 110 } : { width: 260, height: 200 } as const;
 
+  const handleMouseEnter = useCallback(() => {
+    onOfferHover?.(offer.id);
+  }, [onOfferHover, offer.id]);
+
+  const handleMouseLeave = useCallback(() => {
+    onOfferHover?.(null);
+  }, [onOfferHover]);
+
   return (
     <article
       className={articleClass}
-      onMouseEnter={() => onMouseEnter?.(offer.id)}
-      onMouseLeave={() => onMouseLeave?.()}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {isPremium && (
         <div className="place-card__mark">
@@ -67,7 +77,11 @@ export function OfferCard({ offer, variant = 'cities', onMouseEnter, onMouseLeav
       </div>
     </article>
   );
-}
+};
+
+OfferCardComponent.displayName = 'OfferCard';
+
+const OfferCard = React.memo(OfferCardComponent);
 
 export default OfferCard;
 

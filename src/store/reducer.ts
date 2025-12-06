@@ -40,77 +40,56 @@ const initialState: State = {
 };
 
 export function reducer(state: State = initialState, action: { type: string; payload?: unknown }): State {
-  switch (action.type) {
-    case 'changeCity':
-      return {
-        ...state,
-        city: action.payload as string,
-      };
-    case 'loadOffers':
-      return {
-        ...state,
-        offers: action.payload as Offer[],
-        isLoading: false,
-        error: null,
-      };
-    case 'changeSortType':
-      return {
-        ...state,
-        sortType: action.payload as SortType,
-      };
-    case 'setLoading':
-      return {
-        ...state,
-        isLoading: action.payload as boolean,
-      };
-    case 'setError':
-      return {
-        ...state,
-        error: action.payload as string | null,
-        isLoading: false,
-      };
-    case 'requireAuthorization':
-      return {
-        ...state,
-        authorizationStatus: action.payload as AuthorizationStatus,
-      };
-    case 'setUser':
-      return {
-        ...state,
-        user: action.payload as State['user'],
-      };
-    case 'setCurrentOffer':
-      return {
-        ...state,
-        currentOffer: action.payload as Offer | null,
-      };
-    case 'setNearOffers':
-      return {
-        ...state,
-        nearOffers: action.payload as Offer[],
-      };
-    case 'setReviews':
-      return {
-        ...state,
-        reviews: action.payload as ReviewType[],
-      };
-    case 'setOfferLoading':
-      return {
-        ...state,
-        isOfferLoading: action.payload as boolean,
-      };
-    case 'setReviewsLoading':
-      return {
-        ...state,
-        isReviewsLoading: action.payload as boolean,
-      };
-    case 'addReview':
-      return {
-        ...state,
-        reviews: [action.payload as ReviewType, ...state.reviews],
-      };
-    default:
-      return state;
-  }
-}
+  const uiReducer = (s: State, a: { type: string; payload?: unknown }) => {
+    switch (a.type) {
+      case 'changeCity':
+        return { ...s, city: a.payload as string } as State;
+      case 'changeSortType':
+        return { ...s, sortType: a.payload as SortType } as State;
+      case 'setLoading':
+        return { ...s, isLoading: a.payload as boolean } as State;
+      case 'setError':
+        return { ...s, error: a.payload as string | null, isLoading: false } as State;
+      default:
+        return s;
+    }
+  };
 
+  const userReducer = (s: State, a: { type: string; payload?: unknown }) => {
+    switch (a.type) {
+      case 'requireAuthorization':
+        return { ...s, authorizationStatus: a.payload as AuthorizationStatus } as State;
+      case 'setUser':
+        return { ...s, user: a.payload as State['user'] } as State;
+      default:
+        return s;
+    }
+  };
+
+  const offersReducer = (s: State, a: { type: string; payload?: unknown }) => {
+    switch (a.type) {
+      case 'loadOffers':
+        return { ...s, offers: a.payload as Offer[], isLoading: false, error: null } as State;
+      case 'setCurrentOffer':
+        return { ...s, currentOffer: a.payload as Offer | null } as State;
+      case 'setNearOffers':
+        return { ...s, nearOffers: a.payload as Offer[] } as State;
+      case 'setReviews':
+        return { ...s, reviews: a.payload as ReviewType[] } as State;
+      case 'setOfferLoading':
+        return { ...s, isOfferLoading: a.payload as boolean } as State;
+      case 'setReviewsLoading':
+        return { ...s, isReviewsLoading: a.payload as boolean } as State;
+      case 'addReview':
+        return { ...s, reviews: [a.payload as ReviewType, ...s.reviews] } as State;
+      default:
+        return s;
+    }
+  };
+
+  const afterUi = uiReducer(state, action);
+  const afterUser = userReducer(afterUi, action);
+  const afterOffers = offersReducer(afterUser, action);
+
+  return afterOffers;
+}
