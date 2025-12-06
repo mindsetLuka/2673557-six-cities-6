@@ -1,54 +1,37 @@
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { useState, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import OfferList from '../OfferList/OfferList';
 import Map from '../../Map/Map';
 import CityList from '../../CityList/CityList';
 import SortOptions from '../../SortOptions/SortOptions';
 import Spinner from '../../Spinner/Spinner';
-import { RootState } from '../../../store';
+import {
+  selectFilteredAndSortedOffers,
+  selectFavoriteCount,
+  selectIsLoading,
+  selectError,
+  selectAuthorizationStatus,
+  selectUser,
+  selectCity,
+} from '../../../store/selectors';
 import { AppRoute, AuthorizationStatus } from '../../../const';
 import { logout, setUser } from '../../../store/action';
 
 export function MainScreen(): JSX.Element {
   const dispatch = useDispatch();
-  const city = useSelector((state: RootState) => state.data.city);
-  const allOffers = useSelector((state: RootState) => state.data.offers);
-  const sortType = useSelector((state: RootState) => state.data.sortType);
-  const isLoading = useSelector((state: RootState) => state.data.isLoading);
-  const error = useSelector((state: RootState) => state.data.error);
-  const authorizationStatus = useSelector((state: RootState) => state.data.authorizationStatus);
-  const user = useSelector((state: RootState) => state.data.user);
+  const city = useSelector(selectCity);
+  const filteredOffers = useSelector(selectFilteredAndSortedOffers);
+  const favoriteCount = useSelector(selectFavoriteCount);
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
+  const user = useSelector(selectUser);
   const [hoveredOfferId, setHoveredOfferId] = useState<string | null>(null);
-
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     dispatch(logout());
     dispatch(setUser(null));
-  };
-
-  const filteredOffers = useMemo(() => {
-    const filtered = allOffers.filter((offer) => offer.city.name === city);
-
-    const sorted = [...filtered];
-    switch (sortType) {
-      case 'Price: low to high':
-        sorted.sort((a, b) => a.price - b.price);
-        break;
-      case 'Price: high to low':
-        sorted.sort((a, b) => b.price - a.price);
-        break;
-      case 'Top rated first':
-        sorted.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'Popular':
-      default:
-        break;
-    }
-
-    return sorted;
-  }, [allOffers, city, sortType]);
-
-  const favoriteCount = useMemo(() => allOffers.filter((offer) => offer.isFavorite).length, [allOffers]);
+  }, [dispatch]);
 
   return (
     <div className="page page--gray page--main">

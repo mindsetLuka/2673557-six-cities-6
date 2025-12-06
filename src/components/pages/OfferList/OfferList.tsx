@@ -1,3 +1,4 @@
+import React from 'react';
 import OfferCard from '../OfferCard/OfferCard';
 import { Offer } from '../../../mocks/offers';
 
@@ -7,7 +8,7 @@ type OfferListProps = {
   onOfferHover?: (offerId: string | null) => void;
 }
 
-export default function OfferList({ offers, variant = 'cities', onOfferHover }: OfferListProps): JSX.Element {
+function OfferListComponent({ offers, variant = 'cities', onOfferHover }: OfferListProps): JSX.Element {
   const getListClass = (variantType: string) => {
     switch (variantType) {
       case 'favorites':
@@ -28,12 +29,13 @@ export default function OfferList({ offers, variant = 'cities', onOfferHover }: 
           key={offer.id}
           offer={offer}
           variant={variant}
-          onMouseEnter={() => onOfferHover?.(offer.id)}
-          onMouseLeave={() => onOfferHover?.(null)}
+          onOfferHover={onOfferHover}
         />
       ))}
     </div>
   );
 }
 
+const OfferList = React.memo(OfferListComponent);
 
+export default OfferList;
