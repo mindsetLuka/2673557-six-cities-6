@@ -1,15 +1,24 @@
 import { useState, FormEvent, ChangeEvent, Fragment } from 'react';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../store';
+import { postReview } from '../../../store/action';
 
 interface CommentFormData {
   rating: string;
   comment: string;
 }
 
-function CommentForm(): JSX.Element {
+type CommentFormProps = {
+  offerId: string;
+};
+
+function CommentForm({ offerId }: CommentFormProps): JSX.Element {
+  const dispatch = useDispatch<AppDispatch>();
   const [formData, setFormData] = useState<CommentFormData>({
     rating: '',
     comment: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRatingChange = (evt: ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -27,11 +36,19 @@ function CommentForm(): JSX.Element {
 
   const handleSubmit = (evt: FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
+    setIsSubmitting(true);
 
-    setFormData({
-      rating: '',
-      comment: ''
-    });
+    dispatch(postReview(offerId, Number(formData.rating), formData.comment))
+      .then(() => {
+        setFormData({
+          rating: '',
+          comment: ''
+        });
+      })
+      .catch()
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   const isFormValid = formData.rating !== '' && formData.comment.length >= 50 && formData.comment.length <= 300;
@@ -100,9 +117,9 @@ function CommentForm(): JSX.Element {
         <button
           className="reviews__submit form__submit button"
           type="submit"
-          disabled={!isFormValid}
+          disabled={!isFormValid || isSubmitting}
         >
-          Submit
+          {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>
     </form>
