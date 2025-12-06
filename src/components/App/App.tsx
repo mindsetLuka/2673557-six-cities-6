@@ -5,7 +5,7 @@ import LoginScreen from '../pages/LoginScreen/LoginScreen';
 import FavoritesScreen from '../pages/FavoritesScreen/FavoritesScreen';
 import OfferScreen from '../pages/OfferScreen/OfferScreen';
 import NotFoundScreen from '../pages/NotFoundScreen/NotFoundScreen';
-import { AppRoute, AuthorizationStatus } from '../../const';
+import { AppRoute } from '../../const';
 import PrivateRoute from '../pages/PrivateRoute/PrivateRoute';
 import { RootState } from '../../store';
 
