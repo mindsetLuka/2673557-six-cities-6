@@ -1,13 +1,14 @@
 import { useRef, useEffect } from 'react';
 import { Icon, Marker, layerGroup } from 'leaflet';
 import useMap from '../../hooks/useMap';
-import { URL_MARKER_DEFAULT } from '../../const';
+import { URL_MARKER_DEFAULT, URL_MARKER_ACTIVE } from '../../const';
 import 'leaflet/dist/leaflet.css';
 import { Offer } from '../../mocks/offers.js';
 
 type MapProps = {
     offers: Offer[];
     selectedOffer: Offer;
+    hoveredOfferId?: string | null;
 };
 
 const defaultCustomIcon = new Icon({
@@ -16,7 +17,14 @@ const defaultCustomIcon = new Icon({
   iconAnchor: [20, 40],
 });
 
-function Map({ offers, selectedOffer }: MapProps) {
+const activeCustomIcon = new Icon({
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  iconUrl: URL_MARKER_ACTIVE,
+  iconSize: [40, 40],
+  iconAnchor: [20, 40],
+});
+
+function Map({ offers, selectedOffer, hoveredOfferId }: MapProps) {
   const mapRef = useRef(null);
   const map = useMap(mapRef, selectedOffer);
 
@@ -29,14 +37,15 @@ function Map({ offers, selectedOffer }: MapProps) {
           lng: offer.location.longitude
         });
 
-        marker.setIcon(defaultCustomIcon).addTo(markerLayer);
+        const isHovered = hoveredOfferId === offer.id;
+        marker.setIcon(isHovered ? activeCustomIcon : defaultCustomIcon).addTo(markerLayer);
       });
 
       return () => {
         map.removeLayer(markerLayer);
       };
     }
-  }, [map, offers, selectedOffer]);
+  }, [map, offers, selectedOffer, hoveredOfferId]);
 
   return <div style={{ height: '100%' }} ref={mapRef}></div>;
 }
