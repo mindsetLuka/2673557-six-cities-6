@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosError } from 'axios';
 
 const BASE_URL = 'https://14.design.htmlacademy.pro/six-cities';
 const REQUEST_TIMEOUT = 5000;
@@ -17,6 +17,19 @@ export const createAPI = (): AxiosInstance => {
       }
       return config;
     },
+  );
+
+  api.interceptors.response.use(
+    (response) => response,
+    (error: unknown) => {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response?.status === 401) {
+          localStorage.removeItem('six-cities-token');
+        }
+      }
+      return Promise.reject(error);
+    }
   );
 
   return api;

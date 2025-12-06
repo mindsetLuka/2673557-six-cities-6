@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useState, useMemo } from 'react';
 import OfferList from '../OfferList/OfferList';
 import Map from '../../Map/Map';
@@ -7,15 +7,24 @@ import CityList from '../../CityList/CityList';
 import SortOptions from '../../SortOptions/SortOptions';
 import Spinner from '../../Spinner/Spinner';
 import { RootState } from '../../../store';
-
+import { AppRoute, AuthorizationStatus } from '../../../const';
+import { logout, setUser } from '../../../store/action';
 
 export function MainScreen(): JSX.Element {
+  const dispatch = useDispatch();
   const city = useSelector((state: RootState) => state.data.city);
   const allOffers = useSelector((state: RootState) => state.data.offers);
   const sortType = useSelector((state: RootState) => state.data.sortType);
   const isLoading = useSelector((state: RootState) => state.data.isLoading);
   const error = useSelector((state: RootState) => state.data.error);
+  const authorizationStatus = useSelector((state: RootState) => state.data.authorizationStatus);
+  const user = useSelector((state: RootState) => state.data.user);
   const [hoveredOfferId, setHoveredOfferId] = useState<string | null>(null);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    dispatch(setUser(null));
+  };
 
   const filteredOffers = useMemo(() => {
     const filtered = allOffers.filter((offer) => offer.city.name === city);
@@ -39,6 +48,8 @@ export function MainScreen(): JSX.Element {
     return sorted;
   }, [allOffers, city, sortType]);
 
+  const favoriteCount = useMemo(() => allOffers.filter((offer) => offer.isFavorite).length, [allOffers]);
+
   return (
     <div className="page page--gray page--main">
       <header className="header">
@@ -51,18 +62,39 @@ export function MainScreen(): JSX.Element {
             </div>
             <nav className="header__nav">
               <ul className="header__nav-list">
-                <li className="header__nav-item user">
-                  <a className="header__nav-link header__nav-link--profile" href="#">
-                    <div className="header__avatar-wrapper user__avatar-wrapper"></div>
-                    <span className="header__user-name user__name">Oliver.conner@gmail.com</span>
-                    <span className="header__favorite-count">3</span>
-                  </a>
-                </li>
-                <li className="header__nav-item">
-                  <a className="header__nav-link" href="#">
-                    <span className="header__signout">Sign out</span>
-                  </a>
-                </li>
+                {authorizationStatus === AuthorizationStatus.Auth && user ? (
+                  <>
+                    <li className="header__nav-item user">
+                      <Link className="header__nav-link header__nav-link--profile" to={AppRoute.Favorites}>
+                        <div className="header__avatar-wrapper user__avatar-wrapper">
+                          <img src={user.avatarUrl} alt={user.name} style={{ borderRadius: '50%' }} />
+                        </div>
+                        <span className="header__user-name user__name">{user.email}</span>
+                        {favoriteCount > 0 && (
+                          <span className="header__favorite-count">{favoriteCount}</span>
+                        )}
+                      </Link>
+                    </li>
+                    <li className="header__nav-item">
+                      <a
+                        className="header__nav-link"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleLogout();
+                        }}
+                      >
+                        <span className="header__signout">Sign out</span>
+                      </a>
+                    </li>
+                  </>
+                ) : (
+                  <li className="header__nav-item">
+                    <Link className="header__nav-link" to={AppRoute.Login}>
+                      <span className="header__login">Sign in</span>
+                    </Link>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>
