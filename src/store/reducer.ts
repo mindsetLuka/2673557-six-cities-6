@@ -1,4 +1,5 @@
 import { Offer } from '../mocks/offers';
+import { AuthorizationStatus } from '../const';
 
 export type SortType = 'Popular' | 'Price: low to high' | 'Price: high to low' | 'Top rated first';
 
@@ -8,6 +9,13 @@ export type State = {
   sortType: SortType;
   isLoading: boolean;
   error: string | null;
+  authorizationStatus: AuthorizationStatus;
+  user: {
+    email: string;
+    avatarUrl: string;
+    name: string;
+    isPro: boolean;
+  } | null;
 };
 
 const initialState: State = {
@@ -16,6 +24,8 @@ const initialState: State = {
   sortType: 'Popular',
   isLoading: false,
   error: null,
+  authorizationStatus: AuthorizationStatus.NoAuth,
+  user: null,
 };
 
 export function reducer(state: State = initialState, action: { type: string; payload?: unknown }): State {
@@ -47,6 +57,16 @@ export function reducer(state: State = initialState, action: { type: string; pay
         ...state,
         error: action.payload as string | null,
         isLoading: false,
+      };
+    case 'requireAuthorization':
+      return {
+        ...state,
+        authorizationStatus: action.payload as AuthorizationStatus,
+      };
+    case 'setUser':
+      return {
+        ...state,
+        user: action.payload as State['user'],
       };
     default:
       return state;
