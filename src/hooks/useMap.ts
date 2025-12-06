@@ -33,6 +33,15 @@ function useMap(
     }
   }, [mapRef, city.location]);
 
+  useEffect(() => {
+    if (map) {
+      map.setView(
+        [city.location.latitude, city.location.longitude],
+        city.location.zoom
+      );
+    }
+  }, [map, city.name, city.location.latitude, city.location.longitude, city.location.zoom]);
+
   return map;
 }
 
