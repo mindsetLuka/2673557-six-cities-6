@@ -1,42 +1,52 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import CommentForm from '../ReviewForm/CommentForm';
-import { mockOffers, Offer } from '../../../mocks/offers';
 import ReviewsList from '../ReviewsList/ReviewsList';
 import Map from '../../Map/Map';
 import OfferList from '../OfferList/OfferList';
-import { mockReviews } from '../../../mocks/review';
-
-
-const nearOffers: Offer[] = mockOffers.slice(0, 3);
+import Spinner from '../../Spinner/Spinner';
+import { RootState, AppDispatch } from '../../../store';
+import { fetchOffer, fetchReviews, logout, setUser } from '../../../store/action';
+import { AppRoute, AuthorizationStatus } from '../../../const';
 
 export default function OfferScreen(): JSX.Element {
   const { id } = useParams();
+  const dispatch = useDispatch<AppDispatch>();
+  const offer = useSelector((state: RootState) => state.data.currentOffer);
+  const nearOffers = useSelector((state: RootState) => state.data.nearOffers);
+  const reviews = useSelector((state: RootState) => state.data.reviews);
+  const isOfferLoading = useSelector((state: RootState) => state.data.isOfferLoading);
+  const authorizationStatus = useSelector((state: RootState) => state.data.authorizationStatus);
+  const user = useSelector((state: RootState) => state.data.user);
 
-  const offer: Offer | undefined = mockOffers.find((o) => o.id === id);
+  const handleLogout = () => {
+    dispatch(logout());
+    dispatch(setUser(null));
+  };
 
-  if (!offer) {
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchOffer(id))
+        .catch(() => {
+          // Error is handled by redirect to 404
+        });
+      dispatch(fetchReviews(id));
+    }
+  }, [id, dispatch]);
+
+  if (isOfferLoading) {
     return (
       <div className="page">
-        <header className="header">
-          <div className="container">
-            <div className="header__wrapper">
-              <div className="header__left">
-                <Link to="/" className="header__logo-link header__logo-link--active">
-                  <img className="header__logo" src="img/logo.svg" alt="6 cities logo" width="81" height="41" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </header>
-        <main className="page__main page__main--offer">
-          <div className="container">
-            <h1>Offer not found</h1>
-            <p>The requested offer does not exist.</p>
-            <Link to="/">Back to main</Link>
-          </div>
-        </main>
+        <div className="container" style={{ padding: '48px 16px' }}>
+          <Spinner />
+        </div>
       </div>
     );
+  }
+
+  if (!offer) {
+    return <Navigate to={AppRoute.Unknown} />;
   }
   return (
     <div className="page">
@@ -50,18 +60,36 @@ export default function OfferScreen(): JSX.Element {
             </div>
             <nav className="header__nav">
               <ul className="header__nav-list">
-                <li className="header__nav-item user">
-                  <a className="header__nav-link header__nav-link--profile" href="#">
-                    <div className="header__avatar-wrapper user__avatar-wrapper"></div>
-                    <span className="header__user-name user__name">Oliver.conner@gmail.com</span>
-                    <span className="header__favorite-count">3</span>
-                  </a>
-                </li>
-                <li className="header__nav-item">
-                  <a className="header__nav-link" href="#">
-                    <span className="header__signout">Sign out</span>
-                  </a>
-                </li>
+                {authorizationStatus === AuthorizationStatus.Auth && user ? (
+                  <>
+                    <li className="header__nav-item user">
+                      <Link className="header__nav-link header__nav-link--profile" to={AppRoute.Favorites}>
+                        <div className="header__avatar-wrapper user__avatar-wrapper">
+                          <img src={user.avatarUrl} alt={user.name} style={{ borderRadius: '50%' }} />
+                        </div>
+                        <span className="header__user-name user__name">{user.email}</span>
+                      </Link>
+                    </li>
+                    <li className="header__nav-item">
+                      <a
+                        className="header__nav-link"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleLogout();
+                        }}
+                      >
+                        <span className="header__signout">Sign out</span>
+                      </a>
+                    </li>
+                  </>
+                ) : (
+                  <li className="header__nav-item">
+                    <Link className="header__nav-link" to={AppRoute.Login}>
+                      <span className="header__login">Sign in</span>
+                    </Link>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>
@@ -132,8 +160,8 @@ export default function OfferScreen(): JSX.Element {
                   <p className="offer__text">{offer.description}</p>
                 </div>
               </div>
-              <ReviewsList reviews={mockReviews} />
-              <CommentForm />
+              <ReviewsList reviews={reviews} />
+              {authorizationStatus === AuthorizationStatus.Auth && <CommentForm offerId={id || ''} />}
             </div>
           </div>
           <section className="offer__map map">
