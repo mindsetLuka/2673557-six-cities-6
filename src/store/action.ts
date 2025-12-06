@@ -165,3 +165,15 @@ export const postReview = (id: string, rating: number, comment: string) =>
     dispatch(addReview(data));
   };
 
+export const updateOffer = (offer: Offer) => ({
+  type: 'updateOffer' as const,
+  payload: offer,
+});
+
+export const toggleFavorite = (id: string, isCurrentlyFavorite: boolean) =>
+  async (dispatch: AppDispatch, _getState: () => RootState, api: AxiosInstance) => {
+    const status = isCurrentlyFavorite ? 0 : 1;
+    const { data } = await api.post<Offer>(`/favorite/${id}/${status}`);
+    dispatch(updateOffer(data));
+  };
+
