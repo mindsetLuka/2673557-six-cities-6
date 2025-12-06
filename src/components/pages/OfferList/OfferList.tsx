@@ -1,15 +1,13 @@
-import { useState } from 'react';
 import OfferCard from '../OfferCard/OfferCard';
 import { Offer } from '../../../mocks/offers';
 
 type OfferListProps = {
   offers: Offer[];
   variant?: 'cities' | 'near-places' | 'favorites';
+  onOfferHover?: (offerId: string | null) => void;
 }
 
-export default function OfferList({ offers, variant = 'cities' }: OfferListProps): JSX.Element {
-  const [, setActiveOfferId] = useState<string | null>(null);
-
+export default function OfferList({ offers, variant = 'cities', onOfferHover }: OfferListProps): JSX.Element {
   const getListClass = (variantType: string) => {
     switch (variantType) {
       case 'favorites':
@@ -30,8 +28,8 @@ export default function OfferList({ offers, variant = 'cities' }: OfferListProps
           key={offer.id}
           offer={offer}
           variant={variant}
-          onMouseEnter={(id) => setActiveOfferId(id)}
-          onMouseLeave={() => setActiveOfferId(null)}
+          onMouseEnter={() => onOfferHover?.(offer.id)}
+          onMouseLeave={() => onOfferHover?.(null)}
         />
       ))}
     </div>
