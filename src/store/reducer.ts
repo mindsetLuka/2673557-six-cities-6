@@ -82,6 +82,15 @@ export function reducer(state: State = initialState, action: { type: string; pay
         return { ...s, isReviewsLoading: a.payload as boolean } as State;
       case 'addReview':
         return { ...s, reviews: [a.payload as ReviewType, ...s.reviews] } as State;
+      case 'updateOffer': {
+        const updated = a.payload as Offer;
+        return {
+          ...s,
+          offers: s.offers.map((o) => o.id === updated.id ? updated : o),
+          currentOffer: s.currentOffer && s.currentOffer.id === updated.id ? updated : s.currentOffer,
+          nearOffers: s.nearOffers.map((o) => o.id === updated.id ? updated : o),
+        } as State;
+      }
       default:
         return s;
     }

@@ -1,6 +1,12 @@
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import { selectUser, selectFavoriteCount } from '../../../store/selectors';
 
 export default function FavoritesEmptyScreen(): JSX.Element {
+  const user = useSelector((state: RootState) => selectUser(state));
+  const favoriteCount = useSelector((state: RootState) => selectFavoriteCount(state));
+
   return (
     <div className="page page--favorites-empty">
       <header className="header">
@@ -16,8 +22,8 @@ export default function FavoritesEmptyScreen(): JSX.Element {
                 <li className="header__nav-item user">
                   <a className="header__nav-link header__nav-link--profile" href="#">
                     <div className="header__avatar-wrapper user__avatar-wrapper"></div>
-                    <span className="header__user-name user__name">Oliver.conner@gmail.com</span>
-                    <span className="header__favorite-count">0</span>
+                    <span className="header__user-name user__name">{user?.email ?? ''}</span>
+                    <span className="header__favorite-count">{favoriteCount}</span>
                   </a>
                 </li>
                 <li className="header__nav-item">
@@ -50,5 +56,3 @@ export default function FavoritesEmptyScreen(): JSX.Element {
     </div>
   );
 }
-
-

@@ -1,6 +1,10 @@
 import React, { useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Offer } from '../../../mocks/offers';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleFavorite } from '../../../store/action';
+import { AppRoute, AuthorizationStatus } from '../../../const';
+import { RootState, AppDispatch } from '../../../store';
 
 type OfferCardProps = {
   offer: Offer;
@@ -35,6 +39,19 @@ const OfferCardComponent = (
     onOfferHover?.(null);
   }, [onOfferHover]);
 
+  const dispatch = useDispatch<AppDispatch>();
+  const authorizationStatus = useSelector((state: RootState) => state.data.authorizationStatus);
+  const navigate = useNavigate();
+
+  const handleBookmarkClick = useCallback(() => {
+    if (authorizationStatus !== AuthorizationStatus.Auth) {
+      navigate(AppRoute.Login);
+      return;
+    }
+
+    dispatch(toggleFavorite(offer.id, isBookmarked));
+  }, [authorizationStatus, navigate, dispatch, offer.id, isBookmarked]);
+
   return (
     <article
       className={articleClass}
@@ -57,7 +74,7 @@ const OfferCardComponent = (
             <b className="place-card__price-value">€{price}</b>
             <span className="place-card__price-text">/ night</span>
           </div>
-          <button className={`place-card__bookmark-button ${isBookmarked ? 'place-card__bookmark-button--active ' : ''}button`} type="button">
+          <button onClick={handleBookmarkClick} className={`place-card__bookmark-button ${isBookmarked ? 'place-card__bookmark-button--active ' : ''}button`} type="button">
             <svg className="place-card__bookmark-icon" width="18" height="19">
               <use xlinkHref="#icon-bookmark"></use>
             </svg>
@@ -78,8 +95,6 @@ const OfferCardComponent = (
     </article>
   );
 };
-
-OfferCardComponent.displayName = 'OfferCard';
 
 const OfferCard = React.memo(OfferCardComponent);
 
