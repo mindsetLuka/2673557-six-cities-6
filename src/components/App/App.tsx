@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import MainScreen from '../pages/MainScreen/MainScreen';
 import LoginScreen from '../pages/LoginScreen/LoginScreen';
 import FavoritesScreen from '../pages/FavoritesScreen/FavoritesScreen';
@@ -6,17 +7,15 @@ import OfferScreen from '../pages/OfferScreen/OfferScreen';
 import NotFoundScreen from '../pages/NotFoundScreen/NotFoundScreen';
 import { AppRoute, AuthorizationStatus } from '../../const';
 import PrivateRoute from '../pages/PrivateRoute/PrivateRoute';
-import { Offer } from '../../mocks/offers';
+import { RootState } from '../../store';
 
-type AppProps = {
-  offers: Offer[];
-}
+function App(): JSX.Element {
+  const offers = useSelector((state: RootState) => state.data.offers);
 
-function App({ offers }: AppProps): JSX.Element {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path={AppRoute.Main} element={<MainScreen offers={offers} />} />
+        <Route path={AppRoute.Main} element={<MainScreen />} />
         <Route path={AppRoute.Login} element={<LoginScreen />} />
         <Route
           path={AppRoute.Favorites}
