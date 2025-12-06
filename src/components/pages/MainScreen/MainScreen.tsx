@@ -5,14 +5,16 @@ import OfferList from '../OfferList/OfferList';
 import Map from '../../Map/Map';
 import CityList from '../../CityList/CityList';
 import SortOptions from '../../SortOptions/SortOptions';
+import Spinner from '../../Spinner/Spinner';
 import { RootState } from '../../../store';
 
 
 export function MainScreen(): JSX.Element {
   const city = useSelector((state: RootState) => state.data.city);
   const allOffers = useSelector((state: RootState) => state.data.offers);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return
   const sortType = useSelector((state: RootState) => state.data.sortType);
+  const isLoading = useSelector((state: RootState) => state.data.isLoading);
+  const error = useSelector((state: RootState) => state.data.error);
   const [hoveredOfferId, setHoveredOfferId] = useState<string | null>(null);
 
   const filteredOffers = useMemo(() => {
@@ -73,41 +75,69 @@ export function MainScreen(): JSX.Element {
           <CityList />
         </div>
         <div className="cities">
-          {filteredOffers.length === 0 ? (
-            <div className="cities__places-container cities__places-container--empty container">
-              <section className="cities__no-places">
-                <div className="cities__status-wrapper tabs__content">
-                  <b className="cities__status">No places to stay available</b>
-                  <p className="cities__status-description">We could not find any property available at the moment in {city}</p>
+          {(() => {
+            if (isLoading) {
+              return (
+                <div className="cities__places-container container">
+                  <Spinner />
                 </div>
-              </section>
-              <div className="cities__right-section"></div>
-            </div>
-          ) : (
-            <div className="cities__places-container container">
-              <section className="cities__places places">
-                <h2 className="visually-hidden">Places</h2>
-                <b className="places__found">{filteredOffers.length} places to stay in {city}</b>
-                <SortOptions />
-                <OfferList
-                  offers={filteredOffers}
-                  variant="cities"
-                  onOfferHover={setHoveredOfferId}
-                />
-              </section>
-              <div className="cities__right-section">
-                <section className="cities__map map">
-                  {filteredOffers.length > 0 && (
-                    <Map
-                      offers={filteredOffers}
-                      selectedOffer={filteredOffers[0]}
-                      hoveredOfferId={hoveredOfferId}
-                    />
-                  )}
+              );
+            }
+
+            if (error) {
+              return (
+                <div className="cities__places-container cities__places-container--empty container">
+                  <section className="cities__no-places">
+                    <div className="cities__status-wrapper tabs__content">
+                      <b className="cities__status">Error loading offers</b>
+                      <p className="cities__status-description">{error}</p>
+                    </div>
+                  </section>
+                  <div className="cities__right-section"></div>
+                </div>
+              );
+            }
+
+            if (filteredOffers.length === 0) {
+              return (
+                <div className="cities__places-container cities__places-container--empty container">
+                  <section className="cities__no-places">
+                    <div className="cities__status-wrapper tabs__content">
+                      <b className="cities__status">No places to stay available</b>
+                      <p className="cities__status-description">We could not find any property available at the moment in {city}</p>
+                    </div>
+                  </section>
+                  <div className="cities__right-section"></div>
+                </div>
+              );
+            }
+
+            return (
+              <div className="cities__places-container container">
+                <section className="cities__places places">
+                  <h2 className="visually-hidden">Places</h2>
+                  <b className="places__found">{filteredOffers.length} places to stay in {city}</b>
+                  <SortOptions />
+                  <OfferList
+                    offers={filteredOffers}
+                    variant="cities"
+                    onOfferHover={setHoveredOfferId}
+                  />
                 </section>
+                <div className="cities__right-section">
+                  <section className="cities__map map">
+                    {filteredOffers.length > 0 ? (
+                      <Map
+                        offers={filteredOffers}
+                        selectedOffer={filteredOffers[0]}
+                        hoveredOfferId={hoveredOfferId}
+                      />
+                    ) : null}
+                  </section>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </main>
     </div>
